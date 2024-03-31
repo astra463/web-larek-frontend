@@ -1,9 +1,16 @@
+import { IProduct } from "../../types";
+
 export type ApiListResponse<Type> = {
     total: number,
     items: Type[]
 };
 
 export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
+
+export interface ApiResponse {
+    total: number;
+    items: IProduct[];
+  }
 
 export class Api {
     readonly baseUrl: string;
