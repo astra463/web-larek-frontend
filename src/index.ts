@@ -55,9 +55,9 @@ const succesModal = new SuccessModal(
 );
 
 // Чтобы мониторить все события, для отладки
-events.onAll(({ eventName, data }) => {
-	console.log(eventName, data);
-});
+// events.onAll(({ eventName, data }) => {
+// 	console.log(eventName, data);
+// });
 
 // Получаем товары с сервера
 api
