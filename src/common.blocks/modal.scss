@@ -7,24 +7,45 @@
   position: absolute;
   display: none;
   justify-content: center;
-  background-color: $overlayBackground;
   z-index: 100;
   padding-top: 5vh;
   padding-bottom: 5vh;
 
   &_active {
     display: flex;
-  }
 
+    &::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: $overlayBackground; // Прозрачный цвет для оверлея
+      z-index: 1; // Устанавливаем z-index ниже, чем у .modal, чтобы оверлей находился за модальным окном
+    }
+  }
   &__container {
     @include mixins.container;
     @include mixins.flex(column);
     gap: $defaultPadding;
-    background-color: $background;
-    min-height: 90vmin;
+    background-color: rgb(15, 33, 55); 
     border-radius: 3rem;
     box-sizing: border-box;
     position: relative;
+    z-index: 2;
+    
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgb(15, 33, 55); 
+      border-radius: 3rem;
+      z-index: -1;
+    }
   }
 
   &__content {
@@ -58,7 +79,7 @@
   }
 
   &__message {
-    white-space:nowrap;
+    white-space: nowrap;
     max-width: 60%;
     text-overflow: ellipsis;
     overflow: hidden;
