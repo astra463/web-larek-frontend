@@ -8,9 +8,7 @@ import {
 	Events,
 	IOrder,
 	FormErrors,
-	ICustomerData,
 } from '../types/index';
-import { CustomerDataForm, OrderDetailsForm } from './Form';
 
 export type CatalogChangeEvent = {
 	catalog: Product[];
@@ -61,6 +59,18 @@ export class AppState extends Model<IAppState> {
 		this.emitChanges(Events.BASKET_CHANGED, { basket: this.basket });
 	}
 
+	isItemInBasket(item: IProduct) {
+		return this.basket.items.some((basketItem) => basketItem.id === item.id);
+	}
+
+	getTotalItemsInBasket() {
+		return this.basket.items.length;
+	}
+
+	getTotalBasketPrice() {
+		return this.basket.total;
+	}
+
 	// Метод для очистки корзины
 	clearBasket() {
 		// Очищаем список товаров в корзине
@@ -69,19 +79,26 @@ export class AppState extends Model<IAppState> {
 		this.basket.total = 0;
 		// Генерируем событие об изменении корзины
 		this.emitChanges(Events.BASKET_CLEARED, { basket: this.basket });
+		this.emitChanges(Events.BASKET_CHANGED, { basket: this.basket });
 	}
 
-	setOrderField(field: keyof ICustomerData, value: string) {
-		this.orderData.customerData[field] = value;
-
-		if (this.validateOrder()) {
-			this.events.emit('order:ready', this.orderData.customerData);
-		}
+	setOrderData(data: Partial<IOrder>) {
+		this.orderData = {
+			...this.orderData,
+			orderDetails: {
+				...this.orderData.orderDetails,
+				...data.orderDetails,
+			},
+			customerData: {
+				...this.orderData.customerData,
+				...data.customerData,
+			},
+		};
 	}
 
 	clearOrderData() {
 		// Сбрасываем данные заказа
-		this.orderData = {
+		this.setOrderData({
 			orderDetails: {
 				paymentMethod: 'online',
 				deliveryAddress: '',
@@ -90,59 +107,57 @@ export class AppState extends Model<IAppState> {
 				email: '',
 				phone: '',
 			},
-		};
+		});
+
+		// Очищаем корзину
 		this.clearBasket();
 	}
 
-	validateOrder() {
+	validateAddress(): boolean {
 		const errors: typeof this.formErrors = {};
+		const addressRegex = /^[а-яА-ЯёЁ0-9][а-яА-ЯёЁ0-9\s.,-]{8,}[а-яА-ЯёЁ0-9]$/;
 
-		// Проверка наличия email
-		if (!this.orderData.customerData.email) {
-			errors.email = 'Необходимо указать email';
-		} else {
-			// Проверка валидности email по регулярному выражению
-			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-			if (!emailRegex.test(this.orderData.customerData.email)) {
-				errors.email = 'Неверный формат email';
-			}
-		}
-
-		// Проверка наличия номера телефона
-		if (!this.orderData.customerData.phone) {
-			errors.phone = 'Необходимо указать телефон';
-		} else {
-			// Проверка валидности номера телефона по регулярному выражению
-			const phoneRegex = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/;
-			if (!phoneRegex.test(this.orderData.customerData.phone)) {
-				errors.phone =
-					'Неверный формат номера телефона, ожидается: +7 (XXX) XXX-XX-XX';
-			}
+		if (!this.orderData.orderDetails.deliveryAddress) {
+			errors.deliveryAddress = 'Укажите ваш адрес';
+		} else if (
+			!addressRegex.test(this.orderData.orderDetails.deliveryAddress)
+		) {
+			errors.deliveryAddress = 'Слишком короткий адрес, такое возможно?';
 		}
 
 		this.formErrors = errors;
 		this.events.emit('formErrors:change', this.formErrors);
+
+		// Возвращаем true, если ошибок нет
 		return Object.keys(errors).length === 0;
 	}
 
-	validateAddress(event: object, form: CustomerDataForm | OrderDetailsForm) {
-		const regex = /^[а-яА-ЯёЁ0-9][а-яА-ЯёЁ0-9\s.,-]{8,}[а-яА-ЯёЁ0-9]$/;
-		const errorMessage = 'Неверный формат адреса';
-		{
-			if ('value' in event) {
-				const isValid = regex.test(event.value as string);
-				form.valid = isValid;
+	validateCustomerData(): boolean {
+		const errors: typeof this.formErrors = {};
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		const phoneRegex = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/;
 
-				if (!isValid) {
-					form.errors = errorMessage;
-				} else {
-					form.errors = '';
-				}
-			}
+		// Проверка электронной почты
+		if (!this.orderData.customerData.email) {
+			errors.email = 'Укажите ваш e-mail';
+		} else if (!emailRegex.test(this.orderData.customerData.email)) {
+			errors.email = 'Введите e-mail в формате example@test.com';
 		}
+
+		// Проверка номера телефона
+		if (!this.orderData.customerData.phone) {
+			errors.phone = 'Необходимо указать телефон';
+		} else if (!phoneRegex.test(this.orderData.customerData.phone)) {
+			errors.phone = 'Неверный формат номера телефона';
+		}
+
+		this.formErrors = errors;
+		this.events.emit('formErrors:change', this.formErrors);
+
+		// Возвращаем true, если ошибок нет
+		return Object.keys(errors).length === 0;
 	}
 }
-
 // Определяем класс для модели продукта
 export class Product extends Model<IProduct> {
 	// Свойства продукта

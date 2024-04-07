@@ -1,19 +1,10 @@
 import { Component } from './base/Component';
 import { ensureElement } from '../utils/utils';
-import { IProduct } from '../types';
 
 interface ICardActions {
 	onClick: (event: MouseEvent) => void;
 }
 
-export type CardPreview = {
-	id: string;
-	category: string;
-	title: string;
-	image: string;
-	price: number;
-	description: string;
-};
 
 export interface ICard<T> {
 	category: string;
@@ -89,8 +80,18 @@ export class Card<T> extends Component<ICard<T>> {
 		this.setImage(this._image, value, this.title);
 	}
 
-	set price(value: string) {
-		this.setText(this._price, `${value} синапсов`);
+	set price(value: number) {
+		if(value === 0) {
+			this._price.textContent = 'Недоступно. Товар забыт...';
+			this._price.classList.add('card__price_out-of-stock');
+
+			if(this._button) {
+				this.disableButton();
+			}
+		}
+		else {
+			this.setText(this._price, `${value} синапсов`);
+		}
 	}
 
 	set about(value: string | string[]) {
@@ -109,13 +110,14 @@ export class Card<T> extends Component<ICard<T>> {
 
 	disableButton(): void {
 		this._button.disabled = true;
-		this._button.textContent = 'Товар в корзине';
+		this._button.textContent = 'Товар недоступен';
 	}
 
 	enableButton(): void {
 		this._button.disabled = false;
 		this._button.textContent = 'В корзину';
 	}
+
 
 	set category(value: string) {
 		this.setText(this._category, value);

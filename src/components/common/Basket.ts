@@ -23,6 +23,7 @@ export class Basket extends Component<IBasketView> {
 			});
 		}
 		this.items = [];
+		this.setEmpty();
 	}
 
 	set items(items: HTMLElement[]) {

@@ -34,8 +34,18 @@ export interface IProduct {
 	title: string;
 	image: string;
 	price: number;
-	about: string;
+	about?: string;
 }
+
+export type CardPreview = {
+	id: string;
+	category: ProductCategory;
+	title: string;
+	image: string;
+	price: number;
+	description: string;
+	about?: string;
+};
 
 // Интерфейс для формы ввода данных покупателя
 export interface ICustomerData {

@@ -122,6 +122,10 @@ export class OrderDetailsForm extends Form<IOrderDetails> {
 			this._uponReceiptButton.classList.add(`button_alt-active`);
 		}
 	}
+
+	clearInputs() {
+		this._deliveryAddress.value = '';
+	}
 }
 
 export class CustomerDataForm extends Form<ICustomerData> {
@@ -141,16 +145,56 @@ export class CustomerDataForm extends Form<ICustomerData> {
 			container
 		);
 
+		this._phoneNumberInput.addEventListener('input', this.maskInput.bind(this));
+		this._phoneNumberInput.value = '+7';
+
 		this.container.addEventListener('submit', (e: Event) => {
 			e.preventDefault();
-			this.events.emit(Events.ORDER_PLACED, {
-				email: this._emailInput.value,
-				phone: this._phoneNumberInput.value,
-			});
+			this.events.emit(Events.ORDER_PLACED);
 		});
 	}
 
 	set valid(value: boolean) {
 		this._submit.disabled = !value;
+	}
+
+	private maskInput(event: Event) {
+		const target = event.target as HTMLInputElement;
+		let keyCode: number;
+		if (event instanceof KeyboardEvent) keyCode = event.keyCode;
+		const pos = target.selectionStart || 0;
+		if (pos < 3) event.preventDefault();
+
+		const matrix = '+7 (___) ___-__-__';
+		let i = 0;
+		const val = target.value.replace(/\D/g, '');
+		let new_value = matrix.replace(/[_\d]/g, (a) =>
+			i < val.length ? val.charAt(i++) : a
+		);
+		i = new_value.indexOf('_');
+		if (i !== -1 && i < 5) i = 3;
+		new_value = new_value.slice(0, i !== -1 ? i : undefined);
+
+		const regPattern =
+			'^' +
+			matrix
+				.substr(0, target.value.length)
+				.replace(/_+/g, (a) => `\\d{1,${a.length}}`)
+				.replace(/[+()]/g, '\\$&') +
+			'$';
+		const isValid = new RegExp(regPattern).test(target.value);
+		if (
+			!isValid ||
+			target.value.length < 5 ||
+			(keyCode && keyCode > 47 && keyCode < 58)
+		) {
+			target.value = new_value;
+		}
+	}
+
+	clearInputs() {
+		this._phoneNumberInput.addEventListener('input', this.maskInput.bind(this));
+		this._phoneNumberInput.value = '+7';
+		this._emailInput.value = '';
 	}
 }

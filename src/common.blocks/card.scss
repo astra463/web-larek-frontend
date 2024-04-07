@@ -81,7 +81,9 @@
 
   }
   &__price {
-
+    &_out-of-stock {
+      color: lightgrey;
+    }
   }
 }
 

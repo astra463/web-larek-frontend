@@ -14,7 +14,7 @@ export type ApiListResponse<Type> = {
 export interface IStoreAPI {
 	getProductList: () => Promise<IProduct[]>;
 	getProductItem: (id: string) => Promise<IProduct>;
-	placeOrder: (
+	sendOrder: (
 		orderData: Partial<PlaceOrderRequest>
 	) => Promise<PlaceOrderResponse>;
 }
@@ -43,7 +43,7 @@ export class StoreAPI extends Api implements IStoreAPI {
 		}));
 	}
 
-	placeOrder(requestBody: PlaceOrderRequest): Promise<PlaceOrderResponse> {
+	sendOrder(requestBody: PlaceOrderRequest): Promise<PlaceOrderResponse> {
 		return this.post('/order', requestBody).then(
 			(order: PlaceOrderResponse) => order
 		);
