@@ -275,6 +275,7 @@ events.on(Events.ORDER_PLACED, () => {
 		})
 		.then((res: PlaceOrderResponse) => {
 			succesModal.total = res.total;
+      events.emit(Events.ORDER_COMPLETE);
 		});
 
 	modal.close();
@@ -285,9 +286,13 @@ events.on(Events.ORDER_PLACED, () => {
 
 // после отправки заказа очищаем модель и все формы
 events.on(Events.ORDER_COMPLETE, () => {
-	modal.close();
 	appData.clearOrderData();
 	basket.setEmpty();
 	orderForm.clearInputs();
 	customerDataForm.clearInputs();
 });
+
+events.on(Events.FOR_NEW_PURCHASES, () => {
+	modal.close();
+})
+

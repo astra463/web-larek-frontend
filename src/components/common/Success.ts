@@ -15,7 +15,7 @@ export class SuccessModal extends Component<ISuccessData> {
 
 		if (this._button) {
 			this._button.addEventListener('click', () => {
-				events.emit(Events.ORDER_COMPLETE);
+				events.emit(Events.FOR_NEW_PURCHASES);
 			});
 		}
 	}

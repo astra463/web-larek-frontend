@@ -25,6 +25,7 @@ export enum Events {
 	ORDER_PHONE_NUMBER_CHANGED = 'contacts.phone:change',
 	ORDER_PLACED = 'order:placed',
 	ORDER_COMPLETE = 'order:complete',
+	FOR_NEW_PURCHASES = 'for-new-purchases',
 }
 
 // Интерфейс для товара
